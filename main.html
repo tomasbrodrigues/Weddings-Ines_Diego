@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inês & Diego — Convite de Casamento</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script defer src="assets/main.js"></script>
 </head>
 
@@ -300,7 +301,7 @@
           Confirma a tua presença para prepararmos tudo com carinho.
         </p>
       </div>
-      <form class="form" data-rsvp-form>
+      <form class="form" id="rsvp-form" action="https://formspree.io/f/xpqdzzad" method="POST" data-rsvp-form>
         <label class="field">
           <span data-i18n="rsvpName">Nome</span>
           <input type="text" name="name" required autocomplete="name" />
@@ -326,9 +327,6 @@
           Enviar confirmação
         </button>
         <p class="form__success" data-rsvp-success aria-live="polite"></p>
-        <p class="form__helper" data-i18n="rsvpHelper">
-          Preparado para integração com email ou base de dados.
-        </p>
       </form>
     </section>
 

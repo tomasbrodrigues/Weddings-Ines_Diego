@@ -409,15 +409,51 @@ const setupRsvp = () => {
   const success = document.querySelector("[data-rsvp-success]");
   if (!form || !success) return;
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
+
     const lang = getSavedLang();
-    const message =
-      translations[lang]?.rsvpSuccess || translations["pt-pt"].rsvpSuccess;
-    success.textContent = message;
-    form.reset();
+    success.textContent = "";
+
+    const data = new FormData(form);
+
+    try {
+      const response = await fetch(form.action, {
+        method: form.method || "POST",
+        body: data,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (response.ok) {
+        success.textContent =
+          translations[lang]?.rsvpSuccess ||
+          translations["pt-pt"].rsvpSuccess;
+        form.reset();
+      } else {
+        success.textContent =
+          lang === "es-pe"
+            ? "Ocurrió un error. Inténtalo de nuevo."
+            : "Ocorreu um erro. Tenta novamente.";
+      }
+    } catch (error) {
+      success.textContent =
+        lang === "es-pe"
+          ? "Error de conexión. Inténtalo más tarde."
+          : "Erro de ligação. Tenta mais tarde.";
+    }
   });
 };
+
+const fireConfetti = () => {
+  confetti({
+    particleCount: 80,
+    spread: 60,
+    origin: { y: 0.7 },
+  });
+};
+
 
 const setupCopyIban = () => {
   const button = document.querySelector("[data-copy-iban]");
@@ -428,6 +464,8 @@ const setupCopyIban = () => {
     const text = iban.textContent.trim();
     try {
       await navigator.clipboard.writeText(text);
+      fireConfetti();
+
     } catch (error) {
       const range = document.createRange();
       range.selectNodeContents(iban);
@@ -435,6 +473,7 @@ const setupCopyIban = () => {
       selection.removeAllRanges();
       selection.addRange(range);
       document.execCommand("copy");
+      fireConfetti();
       selection.removeAllRanges();
     }
 
