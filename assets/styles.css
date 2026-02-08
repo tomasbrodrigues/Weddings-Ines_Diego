@@ -335,7 +335,7 @@ a {
 .story__year {
   font-family: var(--serif);
   font-size: 1.3rem;
-  color: var(--accent);
+  color: var(--accent-soft);
 }
 
 .story__item p {
@@ -412,7 +412,7 @@ a {
   display: inline-flex;
   font-family: var(--serif);
   font-size: 1.1rem;
-  color: var(--accent);
+  color: var(--accent-soft);
   margin-bottom: 0.4rem;
 }
 
