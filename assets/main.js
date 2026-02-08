@@ -186,12 +186,23 @@ const setupCover = () => {
   if (!coverButton || !fadeLayer) return;
 
   coverButton.addEventListener("click", () => {
+    // 🔓 desbloqueia autoplay no mobile
+    const audio = document.querySelector("[data-audio-player]");
+    if (audio) {
+      audio.muted = false;
+      audio.volume = 0.8;
+      audio.play().catch(() => { });
+      localStorage.setItem("wedding-audio-muted", "false");
+    }
+
     fadeLayer.classList.add("is-active");
+
     setTimeout(() => {
       window.location.href = "main.html";
     }, 600);
   });
 };
+
 
 const setupCountdown = () => {
   const countdown = document.querySelector("[data-countdown]");
@@ -486,18 +497,24 @@ const setupAudioToggle = () => {
 
   const label = toggle.querySelector("[data-i18n]");
   const icon = toggle.querySelector(".audio__icon");
-  const storedMuted = localStorage.getItem("wedding-audio-muted");
 
   // state updated by video when it pauses/resumes background audio
   let bgPausedByVideo = false;
 
-  if (storedMuted !== null) {
+  const storedMuted = localStorage.getItem("wedding-audio-muted");
+
+  // regra: se não houver preferência explícita, começa COM som
+  if (storedMuted === null) {
+    audio.muted = false;
+    localStorage.setItem("wedding-audio-muted", "false");
+  } else {
     audio.muted = storedMuted === "true";
   }
 
+
   const updateLabel = () => {
     const lang = getSavedLang();
-    const isSilent = audio.muted || bgPausedByVideo;
+    const isSilent = audio.muted || audio.paused || bgPausedByVideo;
     const key = isSilent ? "audioSoundOn" : "audioSoundOff";
     if (label) {
       label.textContent = translations[lang]?.[key] || translations["pt-pt"][key];
@@ -549,6 +566,12 @@ const setupAudioToggle = () => {
   });
 
   document.addEventListener("languageChanged", updateLabel);
+  // garantir coerência visual no arranque
+  if (!audio.muted) {
+    audio.play().catch(() => { });
+  }
+  updateLabel();
+
   updateLabel();
 };
 
