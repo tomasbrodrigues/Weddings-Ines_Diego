@@ -186,8 +186,14 @@ const setupCover = () => {
   if (!coverButton || !fadeLayer) return;
 
   coverButton.addEventListener("click", () => {
-    // marca que o utilizador abriu o convite
-    sessionStorage.setItem("wedding-audio-intent", "true");
+    // 🔓 desbloqueia autoplay no mobile
+    const audio = document.querySelector("[data-audio-player]");
+    if (audio) {
+      audio.muted = false;
+      audio.volume = 0.8;
+      audio.play().catch(() => { });
+      localStorage.setItem("wedding-audio-muted", "false");
+    }
 
     fadeLayer.classList.add("is-active");
 
@@ -195,7 +201,6 @@ const setupCover = () => {
       window.location.href = "/invite";
     }, 600);
   });
-
 };
 
 
@@ -505,36 +510,6 @@ const setupAudioToggle = () => {
   } else {
     audio.muted = storedMuted === "true";
   }
-
-  // 🔓 arrancar música automaticamente se veio da capa
-  const cameFromCover = sessionStorage.getItem("wedding-audio-intent") === "true";
-
-  const FADE_DURATION = 1500; // ms
-  const TARGET_VOLUME = 0.8;
-
-  const fadeInAudio = (audio) => {
-    audio.volume = 0;
-    audio.play().catch(() => { });
-
-    const start = performance.now();
-
-    const step = (now) => {
-      const progress = Math.min((now - start) / FADE_DURATION, 1);
-      audio.volume = progress * TARGET_VOLUME;
-
-      if (progress < 1 && !audio.muted) {
-        requestAnimationFrame(step);
-      }
-    };
-
-    requestAnimationFrame(step);
-  };
-
-  if (cameFromCover && !audio.muted) {
-    fadeInAudio(audio);
-    sessionStorage.removeItem("wedding-audio-intent");
-  }
-
 
 
   const updateLabel = () => {
