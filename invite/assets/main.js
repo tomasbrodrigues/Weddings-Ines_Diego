@@ -198,7 +198,7 @@ const setupCover = () => {
     fadeLayer.classList.add("is-active");
 
     setTimeout(() => {
-      window.location.href = "main.html";
+      window.location.href = "/invite";
     }, 600);
   });
 };

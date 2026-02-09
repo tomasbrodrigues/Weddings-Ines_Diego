@@ -125,7 +125,7 @@ a {
   align-items: center;
   text-align: center;
   padding: 6rem 8vw 4rem;
-  background: url("../Ines&Diego.jpeg") center/cover no-repeat;
+  background: url("../static_files/Ines%26Diego.jpeg") center/cover no-repeat;
   color: #fefcf9;
   overflow: hidden;
 }
