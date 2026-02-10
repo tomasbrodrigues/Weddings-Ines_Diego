@@ -357,11 +357,27 @@ a {
 
 .program__media {
   align-self: center;
-  width: 100%;
-  border-radius: 1.5rem;
+  width: 50%;
+  margin: 0 auto;
+  margin-top: 1.5rem;
+
+  background: #ffffff;
+  /* moldura branca */
+  padding: 1rem;
+  /* espessura da moldura */
+  border-radius: 1.6rem;
+
   box-shadow: var(--shadow);
-  display: block;
 }
+
+.program__media img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 1rem;
+  /* ligeiramente menos que a moldura */
+}
+
 
 .timeline__item {
   position: relative;
@@ -489,8 +505,8 @@ a {
 }
 
 .form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
 }
 
@@ -740,6 +756,11 @@ textarea {
 }
 
 @media (max-width: 768px) {
+
+  .program__media {
+    width: 100%;
+    margin-top: 1.2rem;
+  }
 
   .cover-hint {
     margin-bottom: 2rem;
