@@ -49,7 +49,7 @@ const translations = {
     galleryTitle: "Galeria",
     gallerySubtitle: "Alguns momentos que fazem parte da nossa história, desde mais pequenos até hoje!",
     rsvpTitle: "RSVP",
-    rsvpSubtitle: "Confirma a tua presença até dia 01 de maio de 2026 para que possamos preparar tudo ao detalhe e com todo o nosso carinho.",
+    rsvpSubtitle: "Confirma a tua presença até <strong>01 de maio de 2026</strong> para que possamos preparar tudo ao detalhe e com todo o nosso carinho.",
     rsvpName: "Nome",
     rsvpGuests: "E-mail",
     rsvpAttendance: "Confirmação",
@@ -132,7 +132,7 @@ const translations = {
     galleryTitle: "Galería",
     gallerySubtitle: "¡Algunos momentos que forman parte de nuestra historia, desde pequeños hasta hoy!",
     rsvpTitle: "RSVP",
-    rsvpSubtitle: "Confirma tu presencia antes del 01 de mayo de 2026 para que podamos preparar todo con detalle y con todo nuestro cariño.",
+    rsvpSubtitle: "Confirma tu presencia antes del <strong>01 de mayo de 2026</strong> para que podamos preparar todo con detalle y con todo nuestro cariño.",
     rsvpName: "Nombre",
     rsvpGuests: "E-mail",
     rsvpAttendance: "Confirmación",
@@ -175,7 +175,7 @@ const applyTranslations = (lang) => {
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const key = el.getAttribute("data-i18n");
     if (dict[key]) {
-      el.textContent = dict[key];
+      el.innerHTML = dict[key];
     }
   });
 };
