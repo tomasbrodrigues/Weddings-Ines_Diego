@@ -181,27 +181,29 @@ const applyTranslations = (lang) => {
 };
 
 const setupCover = () => {
-  const coverButton = document.querySelector("[data-cover]");
-  const fadeLayer = document.querySelector("[data-fade-layer]");
-  if (!coverButton || !fadeLayer) return;
+  const cover = document.querySelector("[data-cover]");
+  const openBtn = document.querySelector("[data-open-invite]");
+  const main = document.querySelector("[data-main]");
+  const audio = document.querySelector("[data-audio-player]");
 
-  coverButton.addEventListener("click", () => {
-    // 🔓 desbloqueia autoplay no mobile
-    const audio = document.querySelector("[data-audio-player]");
-    if (audio) {
-      audio.muted = false;
-      audio.volume = 0.8;
-      audio.play().catch(() => { });
-      localStorage.setItem("wedding-audio-muted", "false");
-    }
+  if (!cover || !openBtn || !main || !audio) return;
 
-    fadeLayer.classList.add("is-active");
+  openBtn.addEventListener("click", () => {
+    // 🎵 tocar música (agora funciona no mobile)
+    audio.muted = false;
+    audio.volume = 0.8;
+    audio.play().catch(() => { });
+
+    // ✨ animação
+    cover.classList.add("is-hidden");
+    main.hidden = false;
 
     setTimeout(() => {
-      window.location.href = "/invite";
+      main.classList.add("is-visible");
     }, 600);
   });
 };
+
 
 
 const setupCountdown = () => {
@@ -490,6 +492,9 @@ const setupCopyIban = () => {
   });
 };
 
+let bgMutedManually = false;
+let updateAudioUI; // 👈 variável global
+
 const setupAudioToggle = () => {
   const audio = document.querySelector("[data-audio-player]");
   const toggle = document.querySelector("[data-audio-toggle]");
@@ -498,82 +503,44 @@ const setupAudioToggle = () => {
   const label = toggle.querySelector("[data-i18n]");
   const icon = toggle.querySelector(".audio__icon");
 
-  // state updated by video when it pauses/resumes background audio
-  let bgPausedByVideo = false;
+  audio.muted = false;
+  audio.volume = 0.8;
 
-  const storedMuted = localStorage.getItem("wedding-audio-muted");
-
-  // regra: se não houver preferência explícita, começa COM som
-  if (storedMuted === null) {
-    audio.muted = false;
-    localStorage.setItem("wedding-audio-muted", "false");
-  } else {
-    audio.muted = storedMuted === "true";
-  }
-
-
-  const updateLabel = () => {
+  updateAudioUI = () => {   // 👈 agora fica acessível fora
     const lang = getSavedLang();
-    const isSilent = audio.muted || audio.paused || bgPausedByVideo;
-    const key = isSilent ? "audioSoundOn" : "audioSoundOff";
+    const isMuted = audio.muted;
+
+    const key = isMuted ? "audioSoundOn" : "audioSoundOff";
+
     if (label) {
-      label.textContent = translations[lang]?.[key] || translations["pt-pt"][key];
+      label.textContent =
+        translations[lang]?.[key] || translations["pt-pt"][key];
     }
-    toggle.classList.toggle("is-muted", isSilent);
-    toggle.setAttribute("aria-pressed", String(!isSilent));
+
+    toggle.classList.toggle("is-muted", isMuted);
+    toggle.setAttribute("aria-pressed", String(!isMuted));
+
     if (icon) {
-      icon.classList.toggle("is-muted", isSilent);
+      icon.classList.toggle("is-muted", isMuted);
     }
-  };
-
-  const applyState = () => {
-    // user manually changed mute state — clear any paused-by-video flag
-    bgPausedByVideo = false;
-    document.dispatchEvent(new CustomEvent("videoBgStateChange", { detail: { pausedByVideo: false } }));
-
-    localStorage.setItem("wedding-audio-muted", String(audio.muted));
-    if (audio.muted) {
-      audio.pause();
-    } else {
-      audio.volume = 0.8;
-      audio.play().catch(() => { });
-    }
-    updateLabel();
   };
 
   toggle.addEventListener("click", () => {
     audio.muted = !audio.muted;
-    applyState();
-  });
+    bgMutedManually = audio.muted;
 
-  // reflect video-driven background-pause state in the UI
-  document.addEventListener("videoBgStateChange", (e) => {
-    bgPausedByVideo = !!(e.detail && e.detail.pausedByVideo);
-    // ensure audio playback state matches intent
-    if (bgPausedByVideo) {
-      if (!audio.paused) audio.pause();
-    } else {
-      // try to resume if appropriate and if not muted by user
-      if (!audio.muted && audio.paused) audio.play().catch(() => { });
+    if (!audio.muted && audio.paused) {
+      audio.play().catch(() => { });
     }
-    updateLabel();
+
+    updateAudioUI();
   });
 
-  audio.addEventListener("play", () => {
-    if (audio.muted) {
-      audio.pause();
-    }
-  });
-
-  document.addEventListener("languageChanged", updateLabel);
-  // garantir coerência visual no arranque
-  if (!audio.muted) {
-    audio.play().catch(() => { });
-  }
-  updateLabel();
-
-  updateLabel();
+  updateAudioUI();
 };
+
+
+
 
 const setupVideoAudioSync = () => {
   const bgAudio = document.querySelector("[data-audio-player]");
@@ -584,23 +551,25 @@ const setupVideoAudioSync = () => {
   let wasBgPlaying = !bgAudio.paused && !bgAudio.muted;
 
   const pauseBg = () => {
-    try {
-      wasBgPlaying = !bgAudio.paused && !bgAudio.muted;
-      if (!bgAudio.paused) bgAudio.pause();
-      // notify UI that background audio was paused by video
-      document.dispatchEvent(new CustomEvent("videoBgStateChange", { detail: { pausedByVideo: true } }));
-    } catch (e) { }
+    if (!bgAudio.paused) {
+      bgAudio.pause();
+    }
+
+    bgAudio.muted = true;
+
+    if (updateAudioUI) updateAudioUI(); // 👈 ATUALIZA BOTÃO
   };
 
   const resumeBg = () => {
-    // notify UI first
-    document.dispatchEvent(new CustomEvent("videoBgStateChange", { detail: { pausedByVideo: false } }));
-    // respect user mute preference
-    if (localStorage.getItem("wedding-audio-muted") === "true") return;
-    if (wasBgPlaying) {
-      bgAudio.play().catch(() => { });
-    }
+    if (bgMutedManually) return;
+
+    bgAudio.muted = false;
+    bgAudio.play().catch(() => { });
+
+    if (updateAudioUI) updateAudioUI(); // 👈 ATUALIZA BOTÃO
   };
+
+
 
   // When the video starts playing, pause bg audio only if the video is audible
   video.addEventListener("play", () => {

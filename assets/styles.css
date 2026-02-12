@@ -29,6 +29,29 @@ body {
   line-height: 1.6;
 }
 
+.cover-screen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100svh;
+}
+
+
+.cover-screen.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.main-content {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.main-content.is-visible {
+  opacity: 1;
+}
+
+
 img {
   max-width: 100%;
   display: block;
