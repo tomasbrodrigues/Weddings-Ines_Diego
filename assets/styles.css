@@ -34,13 +34,17 @@ body {
   inset: 0;
   width: 100vw;
   height: 100svh;
+  transition:
+    opacity 1.2s ease,
+    transform 1.4s cubic-bezier(.22, .61, .36, 1);
 }
-
 
 .cover-screen.is-hidden {
   opacity: 0;
-  visibility: hidden;
+  transform: scale(1.04);
+  pointer-events: none;
 }
+
 
 .main-content {
   opacity: 0;
